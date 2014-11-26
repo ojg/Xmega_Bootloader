@@ -75,7 +75,7 @@
 #define EEPROM(_pageAddr, _byteAddr) \
 	((uint8_t *) MAPPED_EEPROM_START)[_pageAddr*EEPROM_PAGESIZE + _byteAddr]
 
-
+#define NVM_EEMAPEN_bm 0
 
 /* Definitions of macros. */
 

@@ -58,6 +58,9 @@
 
 #include "eeprom_driver.h"
 
+#define NVM_CMD_READ_EEPROM_gc 0x06
+#define NVM_CMD_LOAD_EEPROM_BUFFER_gc 0x33
+
 /*! \brief Write one byte to EEPROM using IO mapping.
  *
  *  This function writes one byte to EEPROM using IO-mapped access.
