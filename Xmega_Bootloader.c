@@ -21,50 +21,51 @@ void BlockRead(unsigned int size, unsigned char mem, ADDR_T *address);
   #define C_TASK /**/
 #endif // __ICCAVR__
 
+#define uart_char_received() (Uart(MY_UART).STATUS & USART_RXCIF_bm)
+
 int main(void)
 {
     void (*funcptr)( void ) = 0x0000; // Set up function pointer to RESET vector.
-    Port(ENTER_BOOTLOADER_PIN).Pin_control(ENTER_BOOTLOADER_PIN) = PORT_OPC_PULLUP_gc;
 
-    //This delay allows the pull-up resistor sufficient time to pull high.
-    //Realistically it only needs to be ~1uS, so waiting 5 cycles @ 2MHz
-    //will be a 2.5uS delay.
-    __builtin_avr_delay_cycles(5);
+    // Check to see if the SPM lock bit is still set. Reset to clear the lock
+    // bit while hopefully still hitting the bootloader entry condition.
+    if(NVM.CTRLB & NVM_SPMLOCK_bm) {
+        CCP_RST();
+    }
 
-    /* Branch to bootloader or application code? */
-#if (BOOTLOADER_PIN_EN == 0)
-    //Active low pin
-    if( !(Port(ENTER_BOOTLOADER_PIN).IN & (1<<Pin(ENTER_BOOTLOADER_PIN))) ) {
-#elif (BOOTLOADER_PIN_EN == 1)
-    //Active high pin
-    if(  (Port(ENTER_BOOTLOADER_PIN).IN & (1<<Pin(ENTER_BOOTLOADER_PIN))) ) {
-#else
-    #error Invalid value for BOOTLOADER_PIN_EN
-#endif
-        // Check to see if the SPM lock bit is still set. Reset to clear the lock
-        // bit while hopefully still hitting the bootloader entry condition.
-        if(NVM.CTRLB & NVM_SPMLOCK_bm) {
-            CCP_RST();
+    Port(LED_PIN).DIRSET = (1 << Pin(LED_PIN));           // Set the pin direction
+
+    ADDR_T address = 0;
+    unsigned int temp_int = 0;
+    unsigned char val = 0;
+    uint8_t k,in_bootloader = 0;
+    int32_t j;
+
+    EEPROM_FlushBuffer();
+    EEPROM_DisableMapping();
+
+    initbootuart();                                       // Initialize UART.
+
+    // UART wait loop
+    k = 3*2;
+    j = 30000;
+    while (!in_bootloader && k > 0)
+    {
+        if (j-- <= 0)
+        {
+            Port(LED_PIN).OUTTGL = (1 << Pin(LED_PIN));
+            j = 30000;
+            k--;
         }
 
-        ADDR_T address = 0;
-        unsigned int temp_int = 0;
-        unsigned char val = 0;
+        // Check for received command character
+        if (uart_char_received() && (recchar() == '\x1b')) {
+            in_bootloader = 1;
+        }
+    }
 
-        EEPROM_FlushBuffer();
-        EEPROM_DisableMapping();
 
-        Port(LED_PIN).DIRSET = (1 << Pin(LED_PIN));           // Set the pin direction
-    #if (LED_ON == 1)
-        Port(LED_PIN).OUTSET = (1 << Pin(LED_PIN));           // Turn on the LED
-    #elif (LED_ON == 0)
-
-    #else
-        #error Invalid value for LED_ON
-    #endif
-
-        initbootuart();                                       // Initialize UART.
-
+    if (in_bootloader) {
         for(;;) {
             val = recchar();                                  // Wait for command character.
 
