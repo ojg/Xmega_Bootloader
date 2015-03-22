@@ -84,4 +84,4 @@ MCU = atxmega64a3u
 ###############################################################################
 
 Programming example:
-c:/progs/avrdude.exe -p atxmega32e5 -P com4 -c avr911 -b 115200 -e -U flash:w:Debug/octogain.hex -v
+c:/progs/avrdude.exe -p atxmega32e5 -P com4 -c avr911 -b 115200 -e -U flash:w:Debug/mcpa.hex -v

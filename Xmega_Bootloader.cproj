@@ -2,7 +2,7 @@
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectVersion>6.1</ProjectVersion>
+    <ProjectVersion>6.2</ProjectVersion>
     <ToolchainName>com.Atmel.AVRGCC8.C</ToolchainName>
     <ProjectGuid>4605be32-0e97-4c9a-aafc-10d26e32de03</ProjectGuid>
     <avrdevice>ATxmega16D4</avrdevice>
@@ -37,6 +37,7 @@
         </dependencies>
       </framework-data>
     </AsfFrameworkConfig>
+    <preserveEEPROM>true</preserveEEPROM>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <ToolchainSettings>
@@ -120,6 +121,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="makefile">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="README">
       <SubType>compile</SubType>
     </None>
   </ItemGroup>

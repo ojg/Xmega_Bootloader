@@ -46,8 +46,19 @@ int main(void)
 
     initbootuart();                                       // Initialize UART.
 
+    if (RST.STATUS & 0x20) {
+        int8_t n = 0;
+        char resetstr[] = "\n\rClose this terminal and run avrdude within 10sec\n\r";
+        /* Software reset issued, wait 10s for avrdude */
+        k = 10*2;
+        while (resetstr[n]) sendchar(resetstr[n++]);
+    }
+    else {
+        k = 3*2;
+    }
+    RST.STATUS = 0x3F;
+
     // UART wait loop
-    k = 3*2;
     j = 30000;
     while (!in_bootloader && k > 0)
     {
