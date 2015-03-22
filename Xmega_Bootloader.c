@@ -21,6 +21,7 @@ void BlockRead(unsigned int size, unsigned char mem, ADDR_T *address);
   #define C_TASK /**/
 #endif // __ICCAVR__
 
+
 #define uart_char_received() (Uart(MY_UART).STATUS & USART_RXCIF_bm)
 
 int main(void)
@@ -48,10 +49,15 @@ int main(void)
 
     if (RST.STATUS & 0x20) {
         int8_t n = 0;
-        char resetstr[] = "\n\rClose this terminal and run avrdude within 10sec\n\r";
+        char resetstr[] = "\n\rXmega Bootloader\n\rClose this terminal and run avrdude within 10sec\n\r";
         /* Software reset issued, wait 10s for avrdude */
         k = 10*2;
         while (resetstr[n]) sendchar(resetstr[n++]);
+
+        PORTA.DIRSET = 0xFF;
+        PORTC.DIRSET = 0xF0;
+        PORTA.OUT = 64;
+        PORTC.OUTSET = 0x00;
     }
     else {
         k = 3*2;
@@ -62,6 +68,9 @@ int main(void)
     j = 30000;
     while (!in_bootloader && k > 0)
     {
+        PORTC.OUTCLR = 0xF0;
+        PORTC.OUTSET = 0x80 >> (k % 4);
+
         if (j-- <= 0)
         {
             Port(LED_PIN).OUTTGL = (1 << Pin(LED_PIN));
