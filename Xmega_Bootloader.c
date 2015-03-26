@@ -53,23 +53,22 @@ int main(void)
         /* Software reset issued, wait 10s for avrdude */
         k = 10*2;
         while (resetstr[n]) sendchar(resetstr[n++]);
-
-        PORTA.DIRSET = 0xFF;
-        PORTC.DIRSET = 0xF0;
-        PORTA.OUT = 64;
-        PORTC.OUTSET = 0x00;
     }
     else {
-        k = 3*2;
+        k = 7;
     }
     RST.STATUS = 0x3F;
 
     // UART wait loop
+    PORTA.DIRSET = 0xFF;
+    PORTC.DIRSET = 0xF0;
+    PORTA.OUT = 64;
+    PORTC.OUTSET = 0x00;
     j = 30000;
     while (!in_bootloader && k > 0)
     {
         PORTC.OUTCLR = 0xF0;
-        PORTC.OUTSET = 0x80 >> (k % 4);
+        PORTC.OUTSET = 0x80 >> (k & 3);
 
         if (j-- <= 0)
         {
